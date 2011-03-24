@@ -8,6 +8,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.security.InvalidParameterException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class I18N {
@@ -16,9 +17,23 @@ public class I18N {
 	public static boolean useCache = true;
 
 	public static <T> T create(Class<T> itf) throws IOException {
-		return create(itf, null);
+		return create(itf, (Locale)null);
 	}
 
+	public static <T> T create(Class<T> itf, Locale locale) throws IOException {
+		String locStr = null;
+		if (locale != null) {
+			locStr = locale.getLanguage();
+			if (locale.getCountry() != null && !"".equals(locale.getCountry())) {
+				locStr += "_"+locale.getCountry();
+			}
+			if (locale.getVariant() != null && !"".equals(locale.getVariant())) {
+				locStr += "_"+locale.getVariant();
+			}
+		}
+		return create(itf, locStr);
+	}
+	
 	@SuppressWarnings("unchecked")
 	public static <T> T create(Class<T> itf, String lang) throws IOException {
 		final String key = itf.getName() + (lang == null ? "" : ("_" + lang));
