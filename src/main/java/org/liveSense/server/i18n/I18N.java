@@ -17,10 +17,14 @@ public class I18N {
 	public static boolean useCache = true;
 
 	public static <T> T create(Class<T> itf) throws IOException {
-		return create(itf, (Locale)null);
+		return create(itf, (Locale)null, (ClassLoader)null);
 	}
 
 	public static <T> T create(Class<T> itf, Locale locale) throws IOException {
+		return create(itf, locale, (ClassLoader)null);		
+	}
+
+	public static <T> T create(Class<T> itf, Locale locale, ClassLoader classLoader) throws IOException {
 		String locStr = null;
 		if (locale != null) {
 			locStr = locale.getLanguage();
@@ -31,31 +35,35 @@ public class I18N {
 				locStr += "_"+locale.getVariant();
 			}
 		}
-		return create(itf, locStr);
+		return create(itf, locStr, classLoader);
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	public static <T> T create(Class<T> itf, String lang) throws IOException {
+		return create(itf, lang, (ClassLoader)null);
+	}
+		
+	@SuppressWarnings("unchecked")
+	public static <T> T create(Class<T> itf, String lang, ClassLoader classLoader) throws IOException {
 		final String key = itf.getName() + (lang == null ? "" : ("_" + lang));
 		if (useCache) {
     		T msg = (T) cache.get(key);
     		if (msg == null) {
-    			msg = createProxy(itf, lang);
+    			msg = createProxy(itf, lang, classLoader);
     			cache.put(key, msg);
     		}
             return msg;
 		} else {
-		    return createProxy(itf, lang);
+		    return createProxy(itf, lang, classLoader);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T> T createProxy(Class<T> itf, String lang) throws IOException {
+	private static <T> T createProxy(Class<T> itf, String lang, ClassLoader classLoader) throws IOException {
 	    InvocationHandler ih;
         if (GenericX.isA(itf, Constants.class)) {
-            ih = new GenericConstants(itf, lang);
+            ih = new GenericConstants(itf, lang, classLoader);
         } else if (GenericX.isA(itf, Messages.class)) {
-            ih = new GenericMessages(itf, lang);
+            ih = new GenericMessages(itf, lang, classLoader);
         } else {
             throw new InvalidParameterException("Class " + itf.getName() + " is not a GWT i18n subclass");
         }

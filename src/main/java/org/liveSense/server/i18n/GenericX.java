@@ -11,11 +11,13 @@ public abstract class GenericX implements InvocationHandler {
 
     protected final Properties properties = new Properties();
     protected final Class<?> itf;
+    protected final ClassLoader classLoader;
 
     public abstract Object invoke(Object proxy, Method method, Object[] args) throws Throwable;
     
-    public GenericX(Class<?> _itf, String lang) throws IOException, InvalidParameterException {
+    public GenericX(Class<?> _itf, String lang, ClassLoader classLoader) throws IOException, InvalidParameterException {
         this.itf = _itf;
+        this.classLoader = classLoader;
         fillProperties(itf, lang);
     }
 
@@ -35,22 +37,28 @@ public abstract class GenericX implements InvocationHandler {
     }
     protected InputStream load(String s) {
         InputStream in = null;
-        ClassLoader cl;
-        cl = Thread.currentThread().getContextClassLoader();
-        if (cl != null) {
-            in = cl.getResourceAsStream(s);
+
+        if (classLoader != null) {
+        	in = classLoader.getResourceAsStream(s);
         }
         if (in == null) {
-            cl = getClass().getClassLoader();
-            if (cl != null) {
-                in = getClass().getClassLoader().getResourceAsStream(s);
-            }
-            if (in == null) {
-                cl = ClassLoader.getSystemClassLoader();
-                if (cl != null) {
-                    in = cl.getResourceAsStream(s);
-                }
-            }
+	        ClassLoader cl;
+	        cl = Thread.currentThread().getContextClassLoader();
+	        if (cl != null) {
+	            in = cl.getResourceAsStream(s);
+	        }
+	        if (in == null) {
+	            cl = getClass().getClassLoader();
+	            if (cl != null) {
+	                in = getClass().getClassLoader().getResourceAsStream(s);
+	            }
+	            if (in == null) {
+	                cl = ClassLoader.getSystemClassLoader();
+	                if (cl != null) {
+	                    in = cl.getResourceAsStream(s);
+	                }
+	            }
+	        }
         }
         return in;
     }

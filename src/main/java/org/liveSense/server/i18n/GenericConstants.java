@@ -19,8 +19,8 @@ import java.util.StringTokenizer;
 
 public class GenericConstants extends GenericX {
 
-    public GenericConstants(Class<?> _itf, String lang) throws IOException, InvalidParameterException {
-        super(_itf, lang);
+    public GenericConstants(Class<?> _itf, String lang, ClassLoader classLoader) throws IOException, InvalidParameterException {
+        super(_itf, lang, classLoader);
     }
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
