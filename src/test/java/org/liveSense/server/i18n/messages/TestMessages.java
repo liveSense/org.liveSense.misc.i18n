@@ -29,7 +29,12 @@ public class TestMessages extends TestCase {
     public void testMessages() throws Exception {
         test(FooMessages.class, "");
     }
-    
+
+    @Test
+    public void testMessagesPureInterface() throws Exception {
+        test(FooMessagesPureInterface.class, "");
+    }
+
     @Test
     public void testMessagesWithAnnotation() throws Exception {
         test(FooMessagesWithAnnotation.class, "method_");
@@ -50,7 +55,7 @@ public class TestMessages extends TestCase {
         Assert.assertEquals("method_test_simple_int(101)", "the value is 101", msg.method_test_simple_int(101));
     }
     
-    protected <T extends Messages> void test(Class<T> c, String method_prefix) throws Exception {
+    protected <T> void test(Class<T> c, String method_prefix) throws Exception {
         T msg_default = I18N.create(c);
         T msg_french = I18N.create(c, "fr");
         Method[] methods = c.getMethods();

@@ -15,19 +15,25 @@ public abstract class GenericX implements InvocationHandler {
 
     public abstract Object invoke(Object proxy, Method method, Object[] args) throws Throwable;
     
-    public GenericX(Class<?> _itf, String lang, ClassLoader classLoader) throws IOException, InvalidParameterException {
+    public GenericX(Class<?> _itf, String lang, String country, String variant, ClassLoader classLoader) throws IOException, InvalidParameterException {
         this.itf = _itf;
         this.classLoader = classLoader;
-        fillProperties(itf, lang);
+        fillProperties(itf, lang, country, variant);
     }
 
-    protected void fillProperties(Class<?> itf, String lang) throws IOException {
+    protected void fillProperties(Class<?> itf, String lang, String country, String variant) throws IOException {
         for (Class<?> superItf : itf.getInterfaces()) {
-            fillProperties(superItf, lang);
+            fillProperties(superItf, lang, country, variant);
         }
-        String suffix = lang == null ? "" : ("_" +lang);
+        String suffixLang = ((lang == null || "".equals(lang)) ? "" : ("_" +lang)) ;
+        String suffixCountry = ((country == null || "".equals(country)) ? "" : ("_" +country));
+        String suffixVariant = ((variant == null || "".equals(variant)) ? "" : ("_" +variant));
+
         String baseName = itf.getName().replace('.', '/');
-        InputStream in = load(baseName + suffix + ".properties");
+        InputStream in = null;
+        if (in == null && !suffixVariant.equals("")) in = load(baseName + suffixLang + suffixCountry + suffixVariant + ".properties");
+        if (in == null && !suffixCountry.equals("")) in = load(baseName + suffixLang + suffixCountry + ".properties");
+        if (in == null && !suffixLang.equals("")) in = load(baseName + suffixLang + ".properties");
         if (in == null) {
             in = load(baseName + ".properties");
         }

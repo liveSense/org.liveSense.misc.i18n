@@ -17,8 +17,8 @@ import java.util.Map;
 
 public class GenericMessages extends GenericX {
 
-    public GenericMessages(Class<?> _itf, String lang, ClassLoader classLoader) throws IOException, InvalidParameterException {
-        super(_itf, lang, classLoader);
+    public GenericMessages(Class<?> _itf, String lang, String country, String variant, ClassLoader classLoader) throws IOException, InvalidParameterException {
+        super(_itf, lang, country, variant, classLoader);
     }
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
