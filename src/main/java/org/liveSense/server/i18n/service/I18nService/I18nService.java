@@ -37,6 +37,12 @@ public interface I18nService {
 	public ResourceBundle getResourceBundle(String className, String lang) throws IOException, ClassNotFoundException;
 
 	public ResourceBundle getResourceBundle(String className, String lang, ClassLoader classLoader) throws IOException, ClassNotFoundException;
+	
+	public ResourceBundle getDynamicResourceBundle(Locale locale);	
 
+	public ResourceBundle getDynamicResourceBundle();
 
+	public void registerResourceBundle(String className);
+	
+	public void unregisterResourceBundle(String className);
 }
