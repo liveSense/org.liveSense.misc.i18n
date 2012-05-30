@@ -17,7 +17,7 @@
 	<artifactId>org.liveSense.misc.i18n</artifactId>
 	<packaging>bundle</packaging>
 	<version>1.0.0-SNAPSHOT</version>
-	<name>liveSense Server Side GWT i18n library</name>
+	<name>liveSense :: Misc :: i18n library</name>
 	<description>liveSense Server Side GWT i18n library
 	</description>
 	<build>
