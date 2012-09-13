@@ -13,15 +13,10 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
-import org.apache.sling.commons.classloader.DynamicClassLoaderProvider;
 import org.liveSense.server.i18n.CompositeProxyResourceBundle;
-import org.liveSense.server.i18n.GenericX;
 import org.liveSense.server.i18n.I18N;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gwt.i18n.client.LocalizableResource;
-import com.google.gwt.i18n.client.Messages;
 
 @Component(immediate=true)
 @Service
@@ -122,7 +117,6 @@ public class I18nServiceImpl implements I18nService {
 		return (T)ret;
 	}
 
-	@SuppressWarnings("unchecked")
 	private <T> T getClassByName(String className) throws ClassNotFoundException {
 		return getClassByName(className, null);
 	}
@@ -192,7 +186,6 @@ public class I18nServiceImpl implements I18nService {
 	}
 
 	private CompositeProxyResourceBundle getCompositeProxyResourceBundleFromCache(Locale locale) {
-		ResourceBundle ret = resourceBundles.get(locale);
 		
 		// If CompositeResource bundle does not exists for the given locale, load all message classes for
 		// the given locale
