@@ -1,32 +1,24 @@
 package org.liveSense.server.i18n.service.I18nService;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
-import org.apache.sling.commons.classloader.DynamicClassLoaderProvider;
 import org.liveSense.server.i18n.CompositeProxyResourceBundle;
-import org.liveSense.server.i18n.GenericX;
-import org.liveSense.server.i18n.I18N;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gwt.i18n.client.LocalizableResource;
-import com.google.gwt.i18n.client.Messages;
 
 @Component(immediate=true)
 @Service
 public class DynamicI18nResourceBundleServiceImpl implements DynamicI18nResourceBundleService {
 
 	Logger log = LoggerFactory.getLogger(DynamicI18nResourceBundleServiceImpl.class);
+
 	@Reference
 	I18nService i18nService;
 	

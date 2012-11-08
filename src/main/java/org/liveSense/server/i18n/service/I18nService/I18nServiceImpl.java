@@ -12,9 +12,10 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
+import org.liveSense.core.service.OSGIClassLoaderManager;
 import org.liveSense.server.i18n.CompositeProxyResourceBundle;
 import org.liveSense.server.i18n.I18N;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,30 +25,31 @@ public class I18nServiceImpl implements I18nService {
 
 	Logger log = LoggerFactory.getLogger(I18nServiceImpl.class);
 
-    @Reference
-    private DynamicClassLoaderManager dynamicClassLoaderManager = new DynamicClassLoaderManager() {
-		public ClassLoader getDynamicClassLoader() {
-			return this.getClass().getClassLoader();
-		}
-	};
-    
-	@Activate
-	protected void activate() {
-		I18N.resetCache();
-	}
+	@Reference
+	private OSGIClassLoaderManager dynamicClassLoaderManager;
+
+	BundleContext context = null;
+	ClassLoader classLoader = I18nServiceImpl.class.getClassLoader();
 	
+	@Activate
+	protected void activate(BundleContext context) {
+		I18N.resetCache();
+		this.context = context;
+		this.classLoader = dynamicClassLoaderManager.getPackageAdminClassLoader(context);
+	}
+
 	/* (non-Javadoc)
 	 * @see org.liveSense.server.i18n.service.I18nService.I18NService#create(java.lang.Class)
 	 */
 	public <T> T create(Class<T> itf) throws IOException {
-		return I18N.create(itf, (Locale)null, dynamicClassLoaderManager.getDynamicClassLoader());
+		return I18N.create(itf, (Locale)null, classLoader);
 	}
 
 	/* (non-Javadoc)
 	 * @see org.liveSense.server.i18n.service.I18nService.I18NService#create(java.lang.Class, java.util.Locale)
 	 */
 	public <T> T create(Class<T> itf, Locale locale) throws IOException {
-		return I18N.create(itf, locale, dynamicClassLoaderManager.getDynamicClassLoader());
+		return I18N.create(itf, locale, classLoader);
 	}
 
 	/* (non-Javadoc)
@@ -63,7 +65,7 @@ public class I18nServiceImpl implements I18nService {
 	public <T> T create(Class<T> itf, String lang) throws IOException {
 		return I18N.create(itf, lang);
 	}
-		
+
 	/* (non-Javadoc)
 	 * @see org.liveSense.server.i18n.service.I18nService.I18NService#create(java.lang.Class, java.lang.String, java.lang.ClassLoader)
 	 */
@@ -74,11 +76,8 @@ public class I18nServiceImpl implements I18nService {
 	private ClassLoader getClassLoader(ClassLoader classLoader) {
 		if (classLoader != null) {
 			return classLoader;
-		} else if (dynamicClassLoaderManager != null && dynamicClassLoaderManager.getDynamicClassLoader() != null) {
-			return dynamicClassLoaderManager.getDynamicClassLoader();
-		} else
-			return I18nServiceImpl.class.getClassLoader();
-		
+		} else 
+			return this.classLoader;
 	}
 
 	private Locale getLocale(Locale locale) {
@@ -86,8 +85,8 @@ public class I18nServiceImpl implements I18nService {
 			return locale;
 		} else 
 			return Locale.getDefault();
-		}
-	
+	}
+
 	@SuppressWarnings("unchecked")
 	private <T> T getClassByName(String className, ClassLoader classLoader) throws ClassNotFoundException, ClassCastException {
 		Object ret = null;
@@ -98,9 +97,9 @@ public class I18nServiceImpl implements I18nService {
 			}
 		}
 		if (ret == null) {
-			if (dynamicClassLoaderManager != null) {
+			if (this.classLoader != null) {
 				try {
-					ret = dynamicClassLoaderManager.getDynamicClassLoader().loadClass(className);
+					ret = this.classLoader.loadClass(className);
 				} catch (ClassNotFoundException e) {
 					throw new ClassNotFoundException("Class not found: "+className+" (liveSense I18N Service)");
 				}
@@ -108,19 +107,13 @@ public class I18nServiceImpl implements I18nService {
 				throw new ClassNotFoundException("Class not found: "+className+" (liveSense I18N Service)");
 			}
 		}
-		/*
-		if (ret instanceof LocalizableResource) {
-			return (T)ret;			
-		} else {
-			throw new ClassCastException(className+" is not instance of com.google.gwt.i18n.client.LocalizableResource");
-		} */
 		return (T)ret;
 	}
 
 	private <T> T getClassByName(String className) throws ClassNotFoundException {
 		return getClassByName(className, null);
 	}
-	
+
 	public Object create(String className) throws IOException, ClassNotFoundException {
 		return I18N.create((Class<?>) getClassByName(className));
 	}
@@ -160,10 +153,10 @@ public class I18nServiceImpl implements I18nService {
 	}
 
 	public ResourceBundle getResourceBundle(String className, String lang, ClassLoader classLoader) throws IOException,
-			ClassNotFoundException {
+	ClassNotFoundException {
 		return ResourceBundle.getBundle(className.replace('.', '/'), getLocale(I18N.createLocaleFromLang(lang)), getClassLoader(classLoader));
 	}	
-	
+
 	// Composite Resource Loader
 	Map<Locale, CompositeProxyResourceBundle> resourceBundles = new HashMap<Locale, CompositeProxyResourceBundle>();
 	Set<String> classNames = new  HashSet<String>();
@@ -172,7 +165,7 @@ public class I18nServiceImpl implements I18nService {
 
 		if (locale == null) locale = Locale.getDefault();
 		try {
-			crb.addToCache(className, getResourceBundle(className, locale, dynamicClassLoaderManager.getDynamicClassLoader()));
+			crb.addToCache(className, getResourceBundle(className, locale, classLoader));
 		} catch (IOException e) {
 			log.error("Could not refresh bundle: "+className+" Locale: "+locale == null ? "" : locale.toString()+" Is the resource in the Export-Package list?", e);
 		} catch (ClassNotFoundException e) {
@@ -186,7 +179,7 @@ public class I18nServiceImpl implements I18nService {
 	}
 
 	private CompositeProxyResourceBundle getCompositeProxyResourceBundleFromCache(Locale locale) {
-		
+
 		// If CompositeResource bundle does not exists for the given locale, load all message classes for
 		// the given locale
 		if (resourceBundles.get(locale) == null) {
@@ -206,7 +199,7 @@ public class I18nServiceImpl implements I18nService {
 			return getCompositeProxyResourceBundleFromCache(locale);
 		}
 	}
-	
+
 	public ResourceBundle getDynamicResourceBundle() {
 		synchronized (classNames) {
 			return getCompositeProxyResourceBundleFromCache(Locale.getDefault());
@@ -215,7 +208,7 @@ public class I18nServiceImpl implements I18nService {
 
 	public void registerResourceBundle(String className) {
 		synchronized (classNames) {
-			ResourceBundle.clearCache(dynamicClassLoaderManager.getDynamicClassLoader());
+			ResourceBundle.clearCache(classLoader);
 			classNames.add(className);
 
 			// Iterate over existing locales in cache and add new entry
@@ -227,7 +220,7 @@ public class I18nServiceImpl implements I18nService {
 
 	public void unregisterResourceBundle(String className) {
 		synchronized (classNames) {
-			ResourceBundle.clearCache(dynamicClassLoaderManager.getDynamicClassLoader());
+			ResourceBundle.clearCache(classLoader);
 			classNames.remove(className);
 
 			// Iterate over existing locales in cache and add new entry
