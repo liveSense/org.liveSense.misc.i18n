@@ -10,13 +10,14 @@ import java.util.ResourceBundle;
 
 public class CompositeProxyResourceBundle extends ResourceBundle {
 
-	private Map<String, ResourceBundle> cache = new HashMap<String, ResourceBundle>();
+	private final Map<String, ResourceBundle> cache = new HashMap<String, ResourceBundle>();
 	
 	private class CacheResourceBundleEnumeration implements Enumeration<String> {
 
-		private Iterator<Entry<String, ResourceBundle>> cacheIterator = cache.entrySet().iterator();
+		private final Iterator<Entry<String, ResourceBundle>> cacheIterator = cache.entrySet().iterator();
 		private Enumeration<String> itemEnumeratrion = null;
 						
+		@Override
 		public boolean hasMoreElements() {
 			synchronized (cache) {
 				while (true) {
@@ -41,6 +42,7 @@ public class CompositeProxyResourceBundle extends ResourceBundle {
 			}
 		}
 
+		@Override
 		public String nextElement() {
 			synchronized (cache) {
 				while (true) {

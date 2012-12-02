@@ -6,22 +6,27 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.security.InvalidParameterException;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
 public abstract class GenericX implements InvocationHandler {
 
     protected final Properties properties = new Properties();
     protected final Class<?> itf;
     protected final ClassLoader classLoader;
+    protected final ResourceBundle resourceBundle;
 
-    public abstract Object invoke(Object proxy, Method method, Object[] args) throws Throwable;
+    @Override
+	public abstract Object invoke(Object proxy, Method method, Object[] args) throws Throwable;
     
-    public GenericX(Class<?> _itf, String lang, String country, String variant, ClassLoader classLoader) throws IOException, InvalidParameterException {
+    public GenericX(Class<?> _itf, String lang, String country, String variant, ClassLoader classLoader, ResourceBundle bundle) throws IOException, InvalidParameterException {
         this.itf = _itf;
         this.classLoader = classLoader;
-        fillProperties(itf, lang, country, variant);
+        if (bundle == null) fillProperties(itf, lang, country, variant);
+        this.resourceBundle = bundle;
     }
 
-    protected void fillProperties(Class<?> itf, String lang, String country, String variant) throws IOException {
+    
+    public void fillProperties(Class<?> itf, String lang, String country, String variant) throws IOException {
         for (Class<?> superItf : itf.getInterfaces()) {
             fillProperties(superItf, lang, country, variant);
         }
@@ -37,9 +42,11 @@ public abstract class GenericX implements InvocationHandler {
         if (in == null) {
             in = load(baseName + ".properties");
         }
+        
         if (in != null) {
             properties.load(in);
         }
+        
     }
     protected InputStream load(String s) {
         InputStream in = null;
@@ -76,6 +83,8 @@ public abstract class GenericX implements InvocationHandler {
 
     @Override
     public int hashCode() {
+    	if (resourceBundle != null)
+    		return resourceBundle.hashCode();
         return properties.size();
     }
     

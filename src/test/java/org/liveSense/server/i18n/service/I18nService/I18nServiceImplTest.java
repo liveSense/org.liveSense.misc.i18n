@@ -3,13 +3,16 @@
  */
 package org.liveSense.server.i18n.service.I18nService;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.apache.sling.commons.testing.osgi.MockBundle;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -300,8 +303,22 @@ public class I18nServiceImplTest {
 	 */
 	@Test
 	public void testGetDynamicResourceBundle() {
+		MockBundle bundle1 = new MockBundle(1) {
+			@Override
+			public java.net.URL getResource(String name) {
+				return this.getClass().getClassLoader().getResource(name);
+			};
+			
+			@Override
+			public Class<?> loadClass(String name)
+					throws ClassNotFoundException {
+				return this.getClass().getClassLoader().loadClass(name);
+			}
+			
+		};
+
 		// Register DynamicMessage 1
-		service.registerResourceBundle("org.liveSense.server.i18n.messages.DynamicMessages1");
+		service.registerResourceBundle(bundle1, "org.liveSense.server.i18n.messages.DynamicMessages1");
 		ResourceBundle dyn = service.getDynamicResourceBundle();
 
 		assertEquals("The message is test_None1()", dyn.getString("test_None1"));
@@ -314,12 +331,12 @@ public class I18nServiceImplTest {
 		}
 
 		// Register DynamicMessage 2
-		service.registerResourceBundle("org.liveSense.server.i18n.messages.DynamicMessages2");
+		service.registerResourceBundle(bundle1, "org.liveSense.server.i18n.messages.DynamicMessages2");
 		assertEquals("The message is test_None1()", dyn.getString("test_None1"));
 		assertEquals("The message is test_None2()", dyn.getString("test_None2"));
 
 		// unRegister DynamicMessage 2
-		service.unregisterResourceBundle("org.liveSense.server.i18n.messages.DynamicMessages2");
+		service.unregisterResourceBundle(bundle1, "org.liveSense.server.i18n.messages.DynamicMessages2");
 		assertEquals("The message is test_None1()", dyn.getString("test_None1"));
 
 		// The DynamicMessage 2 have to throw MissingResourceException
@@ -335,8 +352,22 @@ public class I18nServiceImplTest {
 	 */
 	@Test
 	public void testGetDynamicResourceBundleLocale() {
+		MockBundle bundle1 = new MockBundle(1) {
+			@Override
+			public java.net.URL getResource(String name) {
+				return this.getClass().getClassLoader().getResource(name);
+			};
+			
+			@Override
+			public Class<?> loadClass(String name)
+					throws ClassNotFoundException {
+				return this.getClass().getClassLoader().loadClass(name);
+			}
+			
+		};
+		
 		// Register DynamicMessage 1
-		service.registerResourceBundle("org.liveSense.server.i18n.messages.DynamicMessages1");
+		service.registerResourceBundle(bundle1, "org.liveSense.server.i18n.messages.DynamicMessages1");
 		ResourceBundle dyn = service.getDynamicResourceBundle(new Locale("fr"));
 		ResourceBundle dyn2 = service.getDynamicResourceBundle(new Locale("en_US"));
 
@@ -352,14 +383,14 @@ public class I18nServiceImplTest {
 		}
 
 		// Register DynamicMessage 2
-		service.registerResourceBundle("org.liveSense.server.i18n.messages.DynamicMessages2");
+		service.registerResourceBundle(bundle1, "org.liveSense.server.i18n.messages.DynamicMessages2");
 		assertEquals("Le message est test_None1()", dyn.getString("test_None1"));
 		assertEquals("Le message est test_None2()", dyn.getString("test_None2"));
 		assertEquals("The message is test_None1()", dyn2.getString("test_None1"));
 		assertEquals("The message is test_None2()", dyn2.getString("test_None2"));
 
 		// unRegister DynamicMessage 2
-		service.unregisterResourceBundle("org.liveSense.server.i18n.messages.DynamicMessages2");
+		service.unregisterResourceBundle(bundle1, "org.liveSense.server.i18n.messages.DynamicMessages2");
 		assertEquals("Le message est test_None1()", dyn.getString("test_None1"));
 		assertEquals("The message is test_None1()", dyn2.getString("test_None1"));
 

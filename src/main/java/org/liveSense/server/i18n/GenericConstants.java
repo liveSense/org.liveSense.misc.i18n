@@ -1,6 +1,13 @@
 package org.liveSense.server.i18n;
 
-import com.google.gwt.i18n.client.ConstantsWithLookup;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.security.InvalidParameterException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.StringTokenizer;
+
 import com.google.gwt.i18n.client.Constants.DefaultBooleanValue;
 import com.google.gwt.i18n.client.Constants.DefaultDoubleValue;
 import com.google.gwt.i18n.client.Constants.DefaultFloatValue;
@@ -8,19 +15,13 @@ import com.google.gwt.i18n.client.Constants.DefaultIntValue;
 import com.google.gwt.i18n.client.Constants.DefaultStringArrayValue;
 import com.google.gwt.i18n.client.Constants.DefaultStringMapValue;
 import com.google.gwt.i18n.client.Constants.DefaultStringValue;
+import com.google.gwt.i18n.client.ConstantsWithLookup;
 import com.google.gwt.i18n.client.LocalizableResource.Key;
-
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.security.InvalidParameterException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
 
 public class GenericConstants extends GenericX {
 
-    public GenericConstants(Class<?> _itf, String lang, String country, String variant, ClassLoader classLoader) throws IOException, InvalidParameterException {
-        super(_itf, lang, country, variant, classLoader);
+    public GenericConstants(Class<?> _itf, String lang, String country, String variant, ClassLoader classLoader, ResourceBundle bundle) throws IOException, InvalidParameterException {
+        super(_itf, lang, country, variant, classLoader, bundle);
     }
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -57,7 +58,9 @@ public class GenericConstants extends GenericX {
             return itf.getMethod(methodName, new Class<?>[0]).invoke(proxy, new Object[0]);
         } catch (Throwable e) {
             //use the method name as property name
-            String resultAsString = properties.getProperty(methodName);
+            String resultAsString = properties.getProperty(methodName); 
+            if (resourceBundle != null) resultAsString = resourceBundle.getString(methodName);
+            
             if (resultAsString == null) {
                 return null;
             } else {
@@ -69,6 +72,8 @@ public class GenericConstants extends GenericX {
     
     private Object buildConstant(String propertyName, Method method) {
         String resultAsString = properties.getProperty(propertyName);
+        if (resourceBundle != null) resultAsString = resourceBundle.getString(propertyName);
+
         if (resultAsString == null) {
             //use the default value (annotation) if there is one
             return getDefaultValue(method);
@@ -153,6 +158,8 @@ public class GenericConstants extends GenericX {
             while(st.hasMoreTokens()) {
                 String key = st.nextToken();
                 String value = properties.getProperty(key);
+                if (resourceBundle != null) value = resourceBundle.getString(key);
+
                 if (value != null) {
                     result.put(key, value);
                 }

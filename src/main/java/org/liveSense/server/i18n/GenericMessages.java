@@ -1,11 +1,5 @@
 package org.liveSense.server.i18n;
 
-import com.google.gwt.i18n.client.PluralRule;
-import com.google.gwt.i18n.client.LocalizableResource.Key;
-import com.google.gwt.i18n.client.Messages.DefaultMessage;
-import com.google.gwt.i18n.client.Messages.PluralCount;
-import com.google.gwt.i18n.client.Messages.PluralText;
-
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -14,14 +8,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
+
+import com.google.gwt.i18n.client.LocalizableResource.Key;
+import com.google.gwt.i18n.client.Messages.DefaultMessage;
+import com.google.gwt.i18n.client.Messages.PluralCount;
+import com.google.gwt.i18n.client.Messages.PluralText;
+import com.google.gwt.i18n.client.PluralRule;
 
 public class GenericMessages extends GenericX {
 
-    public GenericMessages(Class<?> _itf, String lang, String country, String variant, ClassLoader classLoader) throws IOException, InvalidParameterException {
-        super(_itf, lang, country, variant, classLoader);
+    public GenericMessages(Class<?> _itf, String lang, String country, String variant, ClassLoader classLoader, ResourceBundle bundle) throws IOException, InvalidParameterException {
+        super(_itf, lang, country, variant, classLoader, bundle);
     }
 
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    @Override
+	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         if (!String.class.equals(method.getReturnType())) {
             return "Invalid return type of the method " + method.toString();
         }
@@ -86,6 +88,8 @@ public class GenericMessages extends GenericX {
             }
         }
         String template = properties.getProperty(propertyName + pluralKey);
+        if (resourceBundle != null) template = resourceBundle.getString(propertyName + pluralKey);
+
         if (template == null) {
             DefaultMessage dm = method.getAnnotation(DefaultMessage.class);
             if (dm == null) {} else {
