@@ -14,6 +14,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.i18n.ResourceBundleProvider;
 import org.liveSense.core.BundleProxyClassLoader;
@@ -31,10 +32,10 @@ public class I18nServiceImpl implements I18nService {
 
 	Logger log = LoggerFactory.getLogger(I18nServiceImpl.class);
 
-	@Reference
+	@Reference(cardinality=ReferenceCardinality.MANDATORY_UNARY, policy=ReferencePolicy.DYNAMIC)
 	private OSGIClassLoaderManager dynamicClassLoaderManager;
 
-	@Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
+	@Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY, policy=ReferencePolicy.DYNAMIC)
 	ResourceBundleProvider slingI18nService;
 
 	BundleContext context = null;
