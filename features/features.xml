@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<features name="liveSense-${liveSense.version}-misc-i18n" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
+	<feature name="liveSense-misc-i18n" version="${liveSense.misc.i18n.version}" description="liveSense misc i18n">
+		<bundle>mvn:com.github.livesense/org.liveSense.misc.i18n/${liveSense.misc.i18n.version}</bundle>
+	</feature>
+</features>
