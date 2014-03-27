@@ -7,12 +7,12 @@
 		<version>2-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
-
 	<scm>
-		<connection>scm:git:git://github.com/liveSense/org.liveSense.misc.i18n.git</connection>
-		<developerConnection>scm:git:git://github.com/liveSense/org.liveSense.misc.i18n.git</developerConnection>
+		<connection>scm:git:https://github.com/liveSense/org.liveSense.misc.i18n.git</connection>
+		<developerConnection>scm:git:https://github.com/liveSense/org.liveSense.misc.i18n.git</developerConnection>
 		<url>https://github.com/liveSense/org.liveSense.misc.i18n</url>
 	</scm>
+
 
 	<artifactId>org.liveSense.misc.i18n</artifactId>
 	<packaging>bundle</packaging>
